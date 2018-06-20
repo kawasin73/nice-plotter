@@ -1,13 +1,15 @@
-console.log("hello world");
-
 window.addEventListener("load", () => {
   const canvas = document.getElementById('canvas-view');
   const overlay = document.getElementById('canvas-over');
-  const manager = new Manager(canvas, overlay);
+  const manager = new Manager(canvas, overlay, MAX_COUNT);
   manager.setUp();
 });
 
 const SIZE = 3;
+const MODE_WRITE = "write";
+const MODE_ERASER = "eraser";
+const AUTO_SIZE = 50;
+const MAX_COUNT = 1000;
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -15,95 +17,156 @@ function randomCircle(x, y, size) {
   return { x: Math.trunc(r * Math.cos(theta) + x), y: Math.trunc(r * Math.sin(theta) + y) }
 }
 
+// URL: https://qiita.com/gigamori/items/e17e6f9faffb78822c56
+function rnorm() {
+  return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+}
+
+function randomNorm(x, y, size) {
+  return { x: Math.trunc(rnorm() * size / 2 + x), y: Math.trunc(rnorm() * size / 2 + y) }
+}
+
+function getPosition(e) {
+  const rect = e.target.getBoundingClientRect();
+  const mouseX = e.clientX - Math.floor(rect.left) - 2;
+  const mouseY = e.clientY - Math.floor(rect.top) - 2;
+  return { x: mouseX, y: mouseY };
+}
+
 class Manager {
-  constructor(canvas, overlay) {
-    this.table = new PlotTable();
-    this.mode = "write";
+  constructor(canvas, overlay, maxCount) {
+    this.table = new PlotTable(canvas.width);
+    this.drawer = new Drawer(canvas, overlay);
+    this.mode = MODE_WRITE;
     this.down = false;
     this.pointerSize = 50;
     this.pointCount = 5;
+    this.maxCount = maxCount;
 
 
-    this.canvas = canvas;
-    this.overlay = overlay;
-    this.ctx = canvas.getContext('2d');
-    this.ctxOver = overlay.getContext('2d');
-    this.overlay.addEventListener("mousedown", this.onMouseDown.bind(this));
-    this.overlay.addEventListener("mousemove", this.onMouseMove.bind(this));
-    this.overlay.addEventListener("mouseup", this.onMouseUp.bind(this));
-  }
-
-  setUp() {
+    overlay.addEventListener("mousedown", this.onMouseDown.bind(this));
+    overlay.addEventListener("mousemove", this.onMouseMove.bind(this));
+    overlay.addEventListener("mouseup", this.onMouseUp.bind(this));
   }
 
   onMouseDown(e) {
-    const { x, y } = Manager.getPosition(e);
+    const { x, y } = getPosition(e);
     this.down = true;
     console.log("onMouseDown", x, y);
     this.generatePoints(x, y);
   }
 
   onMouseMove(e) {
-    const { x, y } = Manager.getPosition(e);
+    const { x, y } = getPosition(e);
     console.log("onMouseMove", x, y);
-    this.drawPointer(x, y);
+    this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
     if (this.down) {
-      this.generatePoints(x, y);
+      switch (this.mode) {
+        case MODE_WRITE:
+          this.generatePoints(x, y);
+          break;
+        case MODE_ERASER:
+          this.erace(x, y);
+          break;
+      }
     }
   }
 
   onMouseUp(e) {
     this.down = false;
+    this.reload();
   }
 
   generatePoints(baseX, baseY) {
     for (let i = 0; i < this.pointCount; i++) {
       const { x, y } = randomCircle(baseX, baseY, this.pointerSize);
-      console.log("generate ", x, y);
       if (this.table.add(x, y)) {
-        this.drawPoint(x, y);
+        this.drawer.add(x, y);
       }
     }
   }
 
-  static getPosition(e) {
-    const rect = e.target.getBoundingClientRect();
-    const mouseX = e.clientX - Math.floor(rect.left) - 2;
-    const mouseY = e.clientY - Math.floor(rect.top) - 2;
-    return { x: mouseX, y: mouseY };
+  erace(baseX, baseY) {
+    const half = this.pointerSize;
+    this.table.remove(baseX - half, baseX + half, baseY - half, baseY + half);
   }
 
-  drawPointer(x, y) {
-    this.ctxOver.clearRect(0, 0, this.overlay.width, this.overlay.height);
-    this.ctxOver.beginPath();
-    this.ctxOver.arc(x, y, this.pointerSize, 0, 2 * Math.PI, false);
-    this.ctxOver.lineWidth = 1;
-    this.ctxOver.stroke();
-    this.ctxOver.closePath();
+  reload() {
+    this.drawer.drawAll(this.table.all());
   }
 
-  drawAll() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  autoFit() {
+    while (this.table.size <= this.maxCount) {
+      this.generateAuto();
+    }
+    this.removeToMax();
+    this.reload();
+  }
+
+  generateAuto() {
     this.table.all().forEach((point) => {
-      this.drawPoint(point.x, point.y);
+      const { x, y } = randomNorm(point.x, point.y, AUTO_SIZE);
+      this.table.add(x, y);
     });
   }
 
-  drawPoint(x, y) {
+  removeToMax() {
+    while (this.table.size > this.maxCount) {
+      this.table.removeIndex(Math.trunc(Math.random() * this.table.size))
+    }
+  }
+}
+
+class Drawer {
+  constructor(canvas, overlay) {
+    this.canvas = canvas;
+    this.overlay = overlay;
+    this.ctx = canvas.getContext('2d');
+    this.ctxOver = overlay.getContext('2d');
+  }
+
+  add(x, y) {
     this.ctx.beginPath();
     this.ctx.arc(x, y, SIZE, 0, 2 * Math.PI, false);
     this.ctx.fill();
     this.ctx.closePath();
   }
+
+  drawAll(list) {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    list.forEach((point) => {
+      this.add(point.x, point.y);
+    });
+  }
+
+  updatePointer(x, y, size, mode) {
+    this.ctxOver.clearRect(0, 0, this.overlay.width, this.overlay.height);
+    this.ctxOver.beginPath();
+    if (mode === MODE_WRITE) {
+      this.ctxOver.arc(x, y, size, 0, 2 * Math.PI, false);
+      this.ctxOver.lineWidth = 1;
+      this.ctxOver.stroke();
+    } else if (mode === MODE_ERASER) {
+      const half = size / 2;
+      this.ctxOver.rect(x - half, y - half, size, size);
+      this.ctxOver.lineWidth = 1;
+      this.ctxOver.stroke();
+    }
+    this.ctxOver.closePath();
+  }
 }
 
 class PlotTable {
-  constructor() {
+  constructor(max) {
     this.table = [];
     this.size = 0;
+    this.max = max;
   }
 
   add(x, y) {
+    if (x < 0 || x > this.max || y < 0 || y > this.max) {
+      return false;
+    }
     let ylist = this.table.find(list => list.x === x);
     if (!ylist) {
       ylist = { "x": x, "list": [] };
@@ -135,6 +198,7 @@ class PlotTable {
       let ylist = this.table[i];
       if (cur + ylist.list.length > index) {
         ylist.list = ylist.list.splice(index - cur, 1);
+        this.size--;
         break;
       } else {
         cur += ylist.list.length;
@@ -144,7 +208,7 @@ class PlotTable {
 
   all() {
     return this.table.map((ylist) => {
-      ylist.list.map((y) => {
+      return ylist.list.map((y) => {
         return { "x": ylist.x, "y": y };
       })
     }).flatten();
