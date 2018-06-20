@@ -9,14 +9,37 @@
             height: 100%;
             margin: 0;
         }
+
         body {
             overflow: auto;
+        }
+
+        .canvas-container {
+            width: 1000px;
+            height: 1000px;
+            position: relative;
+        }
+
+        .canvas {
+            position: absolute;
+            border: black solid 1px;
+        }
+
+        #canvas-over {
+            z-index: 10;
+        }
+
+        #canvas-view {
+            z-index: 0;
         }
     </style>
     <title>いい感じに散布図作れるやつ</title>
 </head>
 <body>
 <p>hello world</p>
-<div class="root" id="root"></div>
+<div class="canvas-container">
+    <canvas id="canvas-over" class="canvas" width="1000" height="1000"></canvas>
+    <canvas id="canvas-view" class="canvas" width="1000" height="1000"></canvas>
+</div>
 </body>
 </html>
