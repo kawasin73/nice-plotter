@@ -10,7 +10,7 @@ var HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 config = update(config, {
   mode: { $set: 'development' },
 
-  entry: { $set: ['babel-polyfill', './src/entry/index.js'] },
+  entry: { $set: ['babel-polyfill', './src/entry/index.jsx'] },
 
   devtool: { $set: 'eval-source-map' },
 

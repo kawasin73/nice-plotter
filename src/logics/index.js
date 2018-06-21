@@ -1,15 +1,7 @@
-window.addEventListener("load", () => {
-  const canvas = document.getElementById('canvas-view');
-  const overlay = document.getElementById('canvas-over');
-  const manager = new Manager(canvas, overlay, MAX_COUNT);
-  manager.setUp();
-});
-
 const SIZE = 3;
 const MODE_WRITE = "write";
 const MODE_ERASER = "eraser";
 const AUTO_SIZE = 50;
-const MAX_COUNT = 1000;
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -33,20 +25,23 @@ function getPosition(e) {
   return { x: mouseX, y: mouseY };
 }
 
-class Manager {
-  constructor(canvas, overlay, maxCount) {
-    this.table = new PlotTable(canvas.width);
-    this.drawer = new Drawer(canvas, overlay);
+export class Manager {
+  constructor(height, width, maxCount) {
+    this.table = new PlotTable(height, width);
+    this.drawer = new Drawer();
     this.mode = MODE_WRITE;
     this.down = false;
     this.pointerSize = 50;
     this.pointCount = 5;
     this.maxCount = maxCount;
+  }
 
+  updateCanvas(canvas) {
+    this.drawer.updateCanvas(canvas);
+  }
 
-    overlay.addEventListener("mousedown", this.onMouseDown.bind(this));
-    overlay.addEventListener("mousemove", this.onMouseMove.bind(this));
-    overlay.addEventListener("mouseup", this.onMouseUp.bind(this));
+  updateOverlay(overlay) {
+    this.drawer.updateOverlay(overlay);
   }
 
   onMouseDown(e) {
@@ -58,7 +53,6 @@ class Manager {
 
   onMouseMove(e) {
     const { x, y } = getPosition(e);
-    console.log("onMouseMove", x, y);
     this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
     if (this.down) {
       switch (this.mode) {
@@ -73,6 +67,7 @@ class Manager {
   }
 
   onMouseUp(e) {
+    console.log("onMouseUp");
     this.down = false;
     this.reload();
   }
@@ -118,14 +113,28 @@ class Manager {
 }
 
 class Drawer {
-  constructor(canvas, overlay) {
+  constructor() {
+    this.canvas = null;
+    this.overlay = null;
+    this.ctx = null;
+    this.ctxOver = null;
+  }
+
+  updateCanvas(canvas) {
     this.canvas = canvas;
-    this.overlay = overlay;
     this.ctx = canvas.getContext('2d');
+  }
+
+  updateOverlay(overlay) {
+    this.overlay = overlay;
     this.ctxOver = overlay.getContext('2d');
   }
 
   add(x, y) {
+    if (!this.ctx) {
+      console.warn("ctx is not set");
+      return;
+    }
     this.ctx.beginPath();
     this.ctx.arc(x, y, SIZE, 0, 2 * Math.PI, false);
     this.ctx.fill();
@@ -133,6 +142,10 @@ class Drawer {
   }
 
   drawAll(list) {
+    if (!this.ctx) {
+      console.warn("ctx is not set");
+      return;
+    }
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     list.forEach((point) => {
       this.add(point.x, point.y);
@@ -140,6 +153,10 @@ class Drawer {
   }
 
   updatePointer(x, y, size, mode) {
+    if (!this.ctxOver) {
+      console.warn("ctxOver is not set");
+      return;
+    }
     this.ctxOver.clearRect(0, 0, this.overlay.width, this.overlay.height);
     this.ctxOver.beginPath();
     if (mode === MODE_WRITE) {
@@ -157,14 +174,15 @@ class Drawer {
 }
 
 class PlotTable {
-  constructor(max) {
+  constructor(height, width) {
     this.table = [];
     this.size = 0;
-    this.max = max;
+    this.height = height;
+    this.width = width;
   }
 
   add(x, y) {
-    if (x < 0 || x > this.max || y < 0 || y > this.max) {
+    if (x < 0 || x > this.width || y < 0 || y > this.height) {
       return false;
     }
     let ylist = this.table.find(list => list.x === x);

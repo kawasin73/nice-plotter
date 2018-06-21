@@ -13,7 +13,7 @@ var PUBLIC_PATH = path.resolve(__dirname, 'public');
 config = update(config, {
   bail: { $set: true },
 
-  entry: { $set: ['babel-polyfill', './src/entry/index.js'] },
+  entry: { $set: ['babel-polyfill', './src/entry/index.jsx'] },
 
   mode: { $set: 'production' },
 
