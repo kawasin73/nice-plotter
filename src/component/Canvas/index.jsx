@@ -17,29 +17,43 @@ z-index: 10;
 border: black 1px solid;
 `;
 
-export default function Canvas(props) {
-  const { height, width } = props;
-  return (
-    <Container style={{ height, width }}>
-      <CanvasInner
-        innerRef={(canvas) => {
-          console.log("canvas set");
-          props.updateCanvas(canvas);
-        }}
-        height={height}
-        width={width}
-      />
-      <CanvasOver
-        innerRef={(canvas) => {
-          console.log("overlay set");
-          props.updateOverlay(canvas);
-        }}
-        height={height}
-        width={width}
-        onMouseDown={props.onMouseDown}
-        onMouseUp={props.onMouseUp}
-        onMouseMove={props.onMouseMove}
-      />
-    </Container>
-  )
+export default class Canvas extends React.Component {
+  constructor(props) {
+    super(props);
+    // avoid refs argument passed with null
+    // URL: https://github.com/facebook/react/issues/8359#issuecomment-261907121
+    this.updateCanvas = this.updateCanvas.bind(this);
+    this.updateOverlay = this.updateOverlay.bind(this);
+  }
+
+  updateCanvas(canvas) {
+    console.log("canvas set", canvas);
+    this.props.updateCanvas(canvas);
+  }
+
+  updateOverlay(canvas) {
+    console.log("overlay set", canvas);
+    this.props.updateOverlay(canvas);
+  }
+
+  render() {
+    const { height, width } = this.props;
+    return (
+      <Container style={{ height, width }}>
+        <CanvasInner
+          innerRef={this.updateCanvas}
+          height={height}
+          width={width}
+        />
+        <CanvasOver
+          innerRef={this.updateOverlay}
+          height={height}
+          width={width}
+          onMouseDown={this.props.onMouseDown}
+          onMouseUp={this.props.onMouseUp}
+          onMouseMove={this.props.onMouseMove}
+        />
+      </Container>
+    )
+  }
 }

@@ -1,7 +1,7 @@
 const SIZE = 3;
-const MODE_WRITE = "write";
-const MODE_ERASER = "eraser";
-const AUTO_SIZE = 50;
+export const MODE_WRITE = "write";
+export const MODE_ERASER = "eraser";
+const AUTO_SIZE = 10;
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -36,6 +36,10 @@ export class Manager {
     this.maxCount = maxCount;
   }
 
+  get count() {
+    return this.table.size;
+  }
+
   updateCanvas(canvas) {
     this.drawer.updateCanvas(canvas);
   }
@@ -45,10 +49,9 @@ export class Manager {
   }
 
   onMouseDown(e) {
-    const { x, y } = getPosition(e);
     this.down = true;
-    console.log("onMouseDown", x, y);
-    this.generatePoints(x, y);
+    console.log("onMouseDown");
+    this.onMouseMove(e);
   }
 
   onMouseMove(e) {
@@ -57,10 +60,13 @@ export class Manager {
     if (this.down) {
       switch (this.mode) {
         case MODE_WRITE:
+          console.log("generate");
           this.generatePoints(x, y);
           break;
         case MODE_ERASER:
+          console.log("erace");
           this.erace(x, y);
+          this.reload();
           break;
       }
     }
@@ -91,7 +97,7 @@ export class Manager {
   }
 
   autoFit() {
-    while (this.table.size <= this.maxCount) {
+    while (this.table.size > 0 && this.table.size < this.maxCount) {
       this.generateAuto();
     }
     this.removeToMax();
@@ -164,8 +170,7 @@ class Drawer {
       this.ctxOver.lineWidth = 1;
       this.ctxOver.stroke();
     } else if (mode === MODE_ERASER) {
-      const half = size / 2;
-      this.ctxOver.rect(x - half, y - half, size, size);
+      this.ctxOver.rect(x - size, y - size, size * 2, size * 2);
       this.ctxOver.lineWidth = 1;
       this.ctxOver.stroke();
     }
@@ -203,9 +208,9 @@ class PlotTable {
       return ylist.x >= minX && ylist.x <= maxX;
     });
     ylists.forEach((ylist) => {
-      const nextList = ylist.list.filter((y) => y >= minY && y <= maxY);
+      const nextList = ylist.list.filter((y) => !(y >= minY && y <= maxY));
       this.size -= ylist.list.length - nextList.length;
-      y.list = nextList;
+      ylist.list = nextList;
     });
     this.table = this.table.filter((list) => list.list.length > 0);
   }
