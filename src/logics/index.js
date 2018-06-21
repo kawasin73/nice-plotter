@@ -1,7 +1,7 @@
 const SIZE = 3;
 export const MODE_WRITE = "write";
 export const MODE_ERASER = "eraser";
-const AUTO_SIZE = 10;
+const AUTO_SIZE = 20;
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -220,7 +220,7 @@ class PlotTable {
     for (let i = 0; i < this.table.length; i++) {
       let ylist = this.table[i];
       if (cur + ylist.list.length > index) {
-        ylist.list = ylist.list.splice(index - cur, 1);
+        ylist.list.splice(index - cur, 1);
         this.size--;
         break;
       } else {
