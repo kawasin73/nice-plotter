@@ -53,6 +53,7 @@ export default function Panel(props) {
         <p onClick={props.onAutoFit}>いい感じ</p>
         <p onClick={props.onPrev}>戻る{props.canPrev ? "ok" : "false"}</p>
         <p onClick={props.onNext}>進む{props.canNext ? "ok" : "false"}</p>
+        <p onClick={props.onDownload}>ダウンロード</p>
       </div>
     </Container>
   )

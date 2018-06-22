@@ -13,6 +13,7 @@ export default class Drawer {
   updateCanvas(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.initCanvas();
   }
 
   updateOverlay(overlay) {
@@ -20,9 +21,8 @@ export default class Drawer {
     this.ctxOver = overlay.getContext('2d');
   }
 
-  updatePointer(pointer) {
-    this.pointer = pointer;
-    this.ctxPointer = pointer.getContext('2d');
+  dataUrl() {
+    return this.canvas.toDataURL("image/png");
   }
 
   add(x, y) {
@@ -36,12 +36,22 @@ export default class Drawer {
     this.ctx.closePath();
   }
 
+  initCanvas() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.beginPath();
+    this.ctx.rect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.fillStyle = 'white';
+    this.ctx.fill();
+    this.ctx.closePath();
+    this.ctx.fillStyle = 'black';
+  }
+
   drawAll(list) {
     if (!this.ctx) {
       console.warn("ctx is not set");
       return;
     }
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.initCanvas();
     list.forEach((point) => {
       this.add(point.x, point.y);
     });

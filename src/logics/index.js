@@ -11,6 +11,7 @@ const Actions = {
 };
 const AUTO_SIZE = 20;
 const REDUCE_RATIO = 0.05;
+const FILE_NAME = 'plotter.png';
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -32,6 +33,35 @@ function getPosition(e) {
   const mouseX = e.clientX - Math.floor(rect.left) - 2;
   const mouseY = e.clientY - Math.floor(rect.top) - 2;
   return { x: mouseX, y: mouseY };
+}
+
+// URL: https://st40.xyz/one-run/article/133/
+function Base64toBlob(base64) {
+  // カンマで分割して以下のようにデータを分ける
+  // tmp[0] : データ形式（data:image/png;base64）
+  // tmp[1] : base64データ（iVBORw0k～）
+  const tmp = base64.split(',');
+  // base64データの文字列をデコード
+  const data = atob(tmp[1]);
+  // tmp[0]の文字列（data:image/png;base64）からコンテンツタイプ（image/png）部分を取得
+  const mime = tmp[0].split(':')[1].split(';')[0];
+  //  1文字ごとにUTF-16コードを表す 0から65535 の整数を取得
+  const buf = new Uint8Array(data.length);
+  for (let i = 0; i < data.length; i++) {
+    buf[i] = data.charCodeAt(i);
+  }
+  return new Blob([buf], { type: mime });
+}
+
+function saveBlob(blob, fileName) {
+  const url = (window.URL || window.webkitURL);
+  const dataUrl = url.createObjectURL(blob);
+  const event = document.createEvent("MouseEvents");
+  event.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+  const a = document.createElementNS("http://www.w3.org/1999/xhtml", "a");
+  a.href = dataUrl;
+  a.download = fileName;
+  a.dispatchEvent(event);
 }
 
 export class Manager {
@@ -85,6 +115,13 @@ export class Manager {
   updateOverlay(overlay) {
     this.drawer.updateOverlay(overlay);
     this.refreshPointer();
+  }
+
+  download() {
+    this.reload();
+    const base64 = this.drawer.dataUrl();
+    const blob = Base64toBlob(base64);
+    saveBlob(blob, FILE_NAME);
   }
 
   onMouseDown(e) {

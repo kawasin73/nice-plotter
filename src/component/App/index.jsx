@@ -18,6 +18,7 @@ export default class App extends React.Component {
     this.manager = props.manager;
     this.updateOverlay = this.manager.updateOverlay.bind(this.manager);
     this.updateCanvas = this.manager.updateCanvas.bind(this.manager);
+    this.onDownload = this.manager.download.bind(this.manager);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -108,6 +109,7 @@ export default class App extends React.Component {
           onNext={this.onNext}
           onPrev={this.onPrev}
           onUpdatePointer={this.onUpdatePointer}
+          onDownload={this.onDownload}
         />
       </Container>
     )
