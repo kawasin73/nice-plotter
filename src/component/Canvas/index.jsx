@@ -50,8 +50,11 @@ export default class Canvas extends React.Component {
           height={height}
           width={width}
           onMouseDown={this.props.onMouseDown}
+          onTouchStart={this.props.onMouseDown}
           onMouseUp={this.props.onMouseUp}
+          onTouchEnd={this.props.onMouseUp}
           onMouseMove={this.props.onMouseMove}
+          onTouchMove={this.props.onMouseMove}
         />
       </Container>
     )
