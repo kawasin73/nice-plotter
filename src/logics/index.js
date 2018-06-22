@@ -91,7 +91,10 @@ export class Manager {
 
   erace(baseX, baseY) {
     const half = this.pointerSize;
-    this.table.remove(baseX - half, baseX + half, baseY - half, baseY + half);
+    const delPoints = this.table.select(baseX - half, baseX + half, baseY - half, baseY + half);
+    delPoints.forEach((p) => {
+      this.table.del(p.x, p.y);
+    });
   }
 
   reload() {

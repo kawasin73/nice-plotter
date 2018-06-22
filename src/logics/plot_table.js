@@ -23,16 +23,28 @@ export default class PlotTable {
     return true;
   }
 
-  remove(minX, maxX, minY, maxY) {
-    const ylists = this.table.filter((ylist) => {
+  select(minX, maxX, minY, maxY) {
+    return this.table.filter((ylist) => {
       return ylist.x >= minX && ylist.x <= maxX;
-    });
-    ylists.forEach((ylist) => {
-      const nextList = ylist.list.filter((y) => !(y >= minY && y <= maxY));
-      this.size -= ylist.list.length - nextList.length;
-      ylist.list = nextList;
-    });
-    this.table = this.table.filter((list) => list.list.length > 0);
+    }).map((ylist) => {
+      return ylist.list.filter((y) => y >= minY && y <= maxY).map((v) => {
+        return { x: ylist.x, y: v };
+      });
+    }).flatten();
+  }
+
+  del(x, y) {
+    let ylist = this.table.find(list => list.x === x);
+    if (!ylist) {
+      return false;
+    }
+    const i = ylist.list.indexOf(y);
+    if (i < 0) {
+      return false;
+    }
+    ylist.list.splice(i, 1);
+    this.size--;
+    return true;
   }
 
   removeIndex(index) {
