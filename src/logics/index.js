@@ -29,9 +29,10 @@ function randomNorm(x, y, size) {
 }
 
 function getPosition(e) {
+  console.log(e, e.target.getBoundingClientRect(), e.clientX, e.clientY, e.touches[0]);
   const rect = e.target.getBoundingClientRect();
-  const mouseX = e.clientX - Math.floor(rect.left) - 2;
-  const mouseY = e.clientY - Math.floor(rect.top) - 2;
+  const mouseX = (e.clientX || e.touches[0].clientX) - Math.floor(rect.left) - 2;
+  const mouseY = (e.clientY || e.touches[0].clientY) - Math.floor(rect.top) - 2;
   return { x: mouseX, y: mouseY };
 }
 
@@ -137,16 +138,16 @@ export class Manager {
     if (this.down) {
       switch (this.mode) {
         case MODE_WRITE:
-          console.log("generate");
+          console.log("generate", x, y);
           this.generatePoints(x, y);
           break;
         case MODE_ERASER:
-          console.log("erace");
+          console.log("erace", x, y);
           this.erace(x, y);
           this.reload();
           break;
         case MODE_REDUCER:
-          console.log("reduce");
+          console.log("reduce", x, y);
           this.reduce(x, y);
           this.reload();
           break;
