@@ -1,9 +1,14 @@
 import Drawer from './drawer';
 import PlotTable from './plot_table';
+import History from './history';
 
 export const MODE_WRITE = "write";
 export const MODE_ERASER = "eraser";
 export const MODE_REDUCER = "reducer";
+const Actions = {
+  ADD: 'add',
+  DEL: 'del',
+};
 const AUTO_SIZE = 20;
 const REDUCE_RATIO = 0.05;
 
@@ -33,6 +38,7 @@ export class Manager {
   constructor(height, width, maxCount) {
     this.table = new PlotTable(height, width);
     this.drawer = new Drawer();
+    this.history = new History();
     this.mode = MODE_WRITE;
     this.down = false;
     this.pointer = { x: width / 2, y: height / 2 };
@@ -43,6 +49,14 @@ export class Manager {
 
   get count() {
     return this.table.size;
+  }
+
+  get canPrev() {
+    return this.history.canPrev;
+  }
+
+  get canNext() {
+    return this.history.canNext;
   }
 
   changeMode(mode) {
@@ -61,6 +75,7 @@ export class Manager {
 
   onMouseDown(e) {
     this.down = true;
+    this.history.buildStep();
     console.log("onMouseDown");
     this.onMouseMove(e);
   }
@@ -99,6 +114,7 @@ export class Manager {
       const { x, y } = randomCircle(baseX, baseY, this.pointerSize);
       if (this.table.add(x, y)) {
         this.drawer.add(x, y);
+        this.history.add({ type: Actions.ADD, x: x, y: y });
       }
     }
   }
@@ -107,7 +123,9 @@ export class Manager {
     const half = this.pointerSize;
     const delPoints = this.table.select(baseX - half, baseX + half, baseY - half, baseY + half);
     delPoints.forEach((p) => {
-      this.table.del(p.x, p.y);
+      if (this.table.del(p.x, p.y)) {
+        this.history.add({ type: Actions.DEL, x: p.x, y: p.y });
+      }
     });
   }
 
@@ -116,7 +134,9 @@ export class Manager {
     const delPoints = this.table.select(baseX - half, baseX + half, baseY - half, baseY + half);
     for (let delCount = Math.ceil(delPoints.length * REDUCE_RATIO); delCount > 0; delCount--) {
       const i = Math.trunc(Math.random() * delPoints.length);
-      this.table.del(delPoints[i].x, delPoints[i].y);
+      if (this.table.del(delPoints[i].x, delPoints[i].y)) {
+        this.history.add({ type: Actions.DEL, x: delPoints[i].x, y: delPoints[i].y });
+      }
       delPoints.splice(i, 1);
     }
   }
@@ -126,6 +146,7 @@ export class Manager {
   }
 
   autoFit() {
+    this.history.buildStep();
     while (this.table.size > 0 && this.table.size < this.maxCount) {
       this.generateAuto();
     }
@@ -136,13 +157,48 @@ export class Manager {
   generateAuto() {
     this.table.all().forEach((point) => {
       const { x, y } = randomNorm(point.x, point.y, AUTO_SIZE);
-      this.table.add(x, y);
+      if (this.table.add(x, y)) {
+        this.history.add({ type: Actions.ADD, x: x, y: y });
+      }
     });
   }
 
   removeToMax() {
     while (this.table.size > this.maxCount) {
-      this.table.removeIndex(Math.trunc(Math.random() * this.table.size))
+      const { x, y } = this.table.removeIndex(Math.trunc(Math.random() * this.table.size));
+      if (x >= 0) {
+        this.history.add({ type: Actions.DEL, "x": x, "y": y });
+      }
     }
+  }
+
+  goNext() {
+    const list = this.history.next();
+    list.forEach((action) => {
+      switch (action.type) {
+        case Actions.ADD:
+          this.table.add(action.x, action.y);
+          break;
+        case Actions.DEL:
+          this.table.del(action.x, action.y);
+          break;
+      }
+    });
+    this.reload()
+  }
+
+  goPrev() {
+    const list = this.history.prev();
+    list.reverse().forEach((action) => {
+      switch (action.type) {
+        case Actions.ADD:
+          this.table.del(action.x, action.y);
+          break;
+        case Actions.DEL:
+          this.table.add(action.x, action.y);
+          break;
+      }
+    });
+    this.reload()
   }
 }

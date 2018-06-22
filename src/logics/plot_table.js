@@ -52,13 +52,15 @@ export default class PlotTable {
     for (let i = 0; i < this.table.length; i++) {
       let ylist = this.table[i];
       if (cur + ylist.list.length > index) {
+        const y = ylist.list[index - cur];
         ylist.list.splice(index - cur, 1);
         this.size--;
-        break;
+        return { x: ylist.x, y: y };
       } else {
         cur += ylist.list.length;
       }
     }
+    return { x: -1, y: -1 };
   }
 
   all() {

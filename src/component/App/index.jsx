@@ -25,6 +25,8 @@ export default class App extends React.Component {
     this.onEracerMode = this.onEracerMode.bind(this);
     this.onReducerMode = this.onReducerMode.bind(this);
     this.onAutoFit = this.onAutoFit.bind(this);
+    this.onNext = this.onNext.bind(this);
+    this.onPrev = this.onPrev.bind(this);
   }
 
   onMouseDown(e) {
@@ -65,6 +67,16 @@ export default class App extends React.Component {
     this.setState(dummyState);
   }
 
+  onNext() {
+    this.manager.goNext();
+    this.setState(dummyState);
+  }
+
+  onPrev() {
+    this.manager.goPrev();
+    this.setState(dummyState);
+  }
+
   render() {
     return (
       <Container>
@@ -80,10 +92,14 @@ export default class App extends React.Component {
         <Panel
           count={this.manager.count}
           maxCount={this.manager.maxCount}
+          canPrev={this.manager.canPrev}
+          canNext={this.manager.canNext}
           onPlotMode={this.onPlotMode}
           onEracerMode={this.onEracerMode}
           onReducerMode={this.onReducerMode}
           onAutoFit={this.onAutoFit}
+          onNext={this.onNext}
+          onPrev={this.onPrev}
         />
       </Container>
     )
