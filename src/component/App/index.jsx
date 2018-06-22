@@ -27,6 +27,7 @@ export default class App extends React.Component {
     this.onAutoFit = this.onAutoFit.bind(this);
     this.onNext = this.onNext.bind(this);
     this.onPrev = this.onPrev.bind(this);
+    this.onUpdatePointer = this.onUpdatePointer.bind(this);
   }
 
   onMouseDown(e) {
@@ -77,6 +78,11 @@ export default class App extends React.Component {
     this.setState(dummyState);
   }
 
+  onUpdatePointer(count) {
+    this.manager.updatePointCount(count);
+    this.setState(dummyState);
+  }
+
   render() {
     return (
       <Container>
@@ -92,6 +98,7 @@ export default class App extends React.Component {
         <Panel
           count={this.manager.count}
           maxCount={this.manager.maxCount}
+          pointCount={this.manager.pointCount}
           canPrev={this.manager.canPrev}
           canNext={this.manager.canNext}
           onPlotMode={this.onPlotMode}
@@ -100,6 +107,7 @@ export default class App extends React.Component {
           onAutoFit={this.onAutoFit}
           onNext={this.onNext}
           onPrev={this.onPrev}
+          onUpdatePointer={this.onUpdatePointer}
         />
       </Container>
     )

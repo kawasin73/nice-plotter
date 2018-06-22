@@ -6,7 +6,7 @@ module.exports = {
 
   resolve: {
     modules: [path.resolve(__dirname, "src"), 'node_modules'],
-    extensions: ['.js', '.jsx', '.scss']
+    extensions: ['.js', '.jsx', '.scss', '.css']
   },
 
   plugins: [
@@ -34,6 +34,13 @@ module.exports = {
             'react'
           ]
         }
+      },
+      {
+        test: /\.css/,
+        use: [
+          'style-loader',
+          { loader: 'css-loader', options: { url: false } },
+        ],
       },
     ]
   }

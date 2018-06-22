@@ -20,6 +20,11 @@ export default class Drawer {
     this.ctxOver = overlay.getContext('2d');
   }
 
+  updatePointer(pointer) {
+    this.pointer = pointer;
+    this.ctxPointer = pointer.getContext('2d');
+  }
+
   add(x, y) {
     if (!this.ctx) {
       console.warn("ctx is not set");
@@ -42,7 +47,7 @@ export default class Drawer {
     });
   }
 
-  updatePointer(x, y, size, mode) {
+  currentPointer(x, y, size, mode) {
     if (!this.ctxOver) {
       console.warn("ctxOver is not set");
       return;

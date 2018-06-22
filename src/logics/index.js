@@ -42,7 +42,7 @@ export class Manager {
     this.mode = MODE_WRITE;
     this.down = false;
     this.pointer = { x: width / 2, y: height / 2 };
-    this.pointerSize = 50;
+    this.pointerSize = 25;
     this.pointCount = 5;
     this.maxCount = maxCount;
   }
@@ -63,14 +63,28 @@ export class Manager {
     this.mode = mode;
   }
 
+  updatePointCount(count) {
+    this.pointCount = count;
+    if (count <= 1) {
+      this.pointerSize = 1;
+    } else if (count <= 3) {
+      this.pointerSize = count * 5;
+    } else if (count <= 20) {
+      this.pointerSize = count * 10;
+    } else {
+      this.pointCount = 100;
+      this.pointerSize = 100;
+    }
+    this.refreshPointer();
+  }
+
   updateCanvas(canvas) {
     this.drawer.updateCanvas(canvas);
   }
 
   updateOverlay(overlay) {
     this.drawer.updateOverlay(overlay);
-    const { x, y } = this.pointer;
-    this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
+    this.refreshPointer();
   }
 
   onMouseDown(e) {
@@ -82,7 +96,7 @@ export class Manager {
 
   onMouseMove(e) {
     const { x, y } = this.pointer = getPosition(e);
-    this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
+    this.refreshPointer();
     if (this.down) {
       switch (this.mode) {
         case MODE_WRITE:
@@ -143,6 +157,11 @@ export class Manager {
 
   reload() {
     this.drawer.drawAll(this.table.all());
+  }
+
+  refreshPointer() {
+    const { x, y } = this.pointer;
+    this.drawer.currentPointer(x, y, this.pointerSize, this.mode);
   }
 
   autoFit() {
