@@ -11,6 +11,7 @@ const Actions = {
 };
 const AUTO_SIZE = 20;
 const REDUCE_RATIO = 0.05;
+const MOVE_COUNT = 2;
 const FILE_NAME = 'plotter.png';
 
 function randomCircle(x, y, size) {
@@ -75,6 +76,8 @@ export class Manager {
     this.pointerSize = 25;
     this.pointCount = 5;
     this.maxCount = maxCount;
+
+    this.moveCount = 0;
   }
 
   get count() {
@@ -128,6 +131,7 @@ export class Manager {
     this.down = true;
     this.history.buildStep();
     console.log("onMouseDown");
+    this.moveCount = 0;
     this.onMouseMove(e);
   }
 
@@ -137,8 +141,11 @@ export class Manager {
     if (this.down) {
       switch (this.mode) {
         case MODE_WRITE:
-          console.log("generate", x, y);
-          this.generatePoints(x, y);
+          if (this.moveCount == 0) {
+            console.log("generate", x, y);
+            this.generatePoints(x, y);
+          }
+          this.moveCount = ++this.moveCount % MOVE_COUNT;
           break;
         case MODE_ERASER:
           console.log("erace", x, y);
