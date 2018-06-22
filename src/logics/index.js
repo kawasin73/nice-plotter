@@ -3,7 +3,9 @@ import PlotTable from './plot_table';
 
 export const MODE_WRITE = "write";
 export const MODE_ERASER = "eraser";
+export const MODE_REDUCER = "reducer";
 const AUTO_SIZE = 20;
+const REDUCE_RATIO = 0.05;
 
 function randomCircle(x, y, size) {
   const theta = 2 * Math.PI * Math.random();
@@ -33,6 +35,7 @@ export class Manager {
     this.drawer = new Drawer();
     this.mode = MODE_WRITE;
     this.down = false;
+    this.pointer = { x: width / 2, y: height / 2 };
     this.pointerSize = 50;
     this.pointCount = 5;
     this.maxCount = maxCount;
@@ -42,12 +45,18 @@ export class Manager {
     return this.table.size;
   }
 
+  changeMode(mode) {
+    this.mode = mode;
+  }
+
   updateCanvas(canvas) {
     this.drawer.updateCanvas(canvas);
   }
 
   updateOverlay(overlay) {
     this.drawer.updateOverlay(overlay);
+    const { x, y } = this.pointer;
+    this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
   }
 
   onMouseDown(e) {
@@ -57,7 +66,7 @@ export class Manager {
   }
 
   onMouseMove(e) {
-    const { x, y } = getPosition(e);
+    const { x, y } = this.pointer = getPosition(e);
     this.drawer.updatePointer(x, y, this.pointerSize, this.mode);
     if (this.down) {
       switch (this.mode) {
@@ -68,6 +77,11 @@ export class Manager {
         case MODE_ERASER:
           console.log("erace");
           this.erace(x, y);
+          this.reload();
+          break;
+        case MODE_REDUCER:
+          console.log("reduce");
+          this.reduce(x, y);
           this.reload();
           break;
       }
@@ -95,6 +109,16 @@ export class Manager {
     delPoints.forEach((p) => {
       this.table.del(p.x, p.y);
     });
+  }
+
+  reduce(baseX, baseY) {
+    const half = this.pointerSize;
+    const delPoints = this.table.select(baseX - half, baseX + half, baseY - half, baseY + half);
+    for (let delCount = Math.ceil(delPoints.length * REDUCE_RATIO); delCount > 0; delCount--) {
+      const i = Math.trunc(Math.random() * delPoints.length);
+      this.table.del(delPoints[i].x, delPoints[i].y);
+      delPoints.splice(i, 1);
+    }
   }
 
   reload() {

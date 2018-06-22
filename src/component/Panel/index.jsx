@@ -11,6 +11,7 @@ export default function Panel(props) {
       <p>{props.count}/{props.maxCount}</p>
       <p onClick={props.onPlotMode}>書き込み</p>
       <p onClick={props.onEracerMode}>消去</p>
+      <p onClick={props.onReducerMode}>間引く</p>
       <p onClick={props.onAutoFit}>いい感じ</p>
     </Container>
   )

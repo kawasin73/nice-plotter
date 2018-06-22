@@ -1,4 +1,5 @@
-import { MODE_ERASER, MODE_WRITE } from "./index";
+import { MODE_ERASER, MODE_WRITE, MODE_REDUCER } from "./index";
+
 const SIZE = 3;
 
 export default class Drawer {
@@ -48,14 +49,18 @@ export default class Drawer {
     }
     this.ctxOver.clearRect(0, 0, this.overlay.width, this.overlay.height);
     this.ctxOver.beginPath();
-    if (mode === MODE_WRITE) {
-      this.ctxOver.arc(x, y, size, 0, 2 * Math.PI, false);
-      this.ctxOver.lineWidth = 1;
-      this.ctxOver.stroke();
-    } else if (mode === MODE_ERASER) {
-      this.ctxOver.rect(x - size, y - size, size * 2, size * 2);
-      this.ctxOver.lineWidth = 1;
-      this.ctxOver.stroke();
+    switch (mode) {
+      case MODE_WRITE:
+        this.ctxOver.arc(x, y, size, 0, 2 * Math.PI, false);
+        this.ctxOver.lineWidth = 1;
+        this.ctxOver.stroke();
+        break;
+      case MODE_REDUCER:
+      case MODE_ERASER:
+        this.ctxOver.rect(x - size, y - size, size * 2, size * 2);
+        this.ctxOver.lineWidth = 1;
+        this.ctxOver.stroke();
+        break;
     }
     this.ctxOver.closePath();
   }

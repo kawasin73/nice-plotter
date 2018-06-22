@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components'
 import Canvas from '../Canvas';
 import Panel from '../Panel';
-import { MODE_WRITE, MODE_ERASER } from '../../logics';
+import { MODE_WRITE, MODE_ERASER, MODE_REDUCER } from '../../logics';
 
 
 const Container = styled.div`
@@ -23,6 +23,7 @@ export default class App extends React.Component {
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onPlotMode = this.onPlotMode.bind(this);
     this.onEracerMode = this.onEracerMode.bind(this);
+    this.onReducerMode = this.onReducerMode.bind(this);
     this.onAutoFit = this.onAutoFit.bind(this);
   }
 
@@ -45,12 +46,17 @@ export default class App extends React.Component {
   }
 
   onPlotMode() {
-    this.manager.mode = MODE_WRITE;
+    this.manager.changeMode(MODE_WRITE);
     this.setState(dummyState);
   }
 
   onEracerMode() {
-    this.manager.mode = MODE_ERASER;
+    this.manager.changeMode(MODE_ERASER);
+    this.setState(dummyState);
+  }
+
+  onReducerMode() {
+    this.manager.changeMode(MODE_REDUCER);
     this.setState(dummyState);
   }
 
@@ -76,6 +82,7 @@ export default class App extends React.Component {
           maxCount={this.manager.maxCount}
           onPlotMode={this.onPlotMode}
           onEracerMode={this.onEracerMode}
+          onReducerMode={this.onReducerMode}
           onAutoFit={this.onAutoFit}
         />
       </Container>
