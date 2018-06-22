@@ -11,3 +11,8 @@ render(
   <App manager={manager} height={500} width={500}/>,
   document.getElementById('root')
 );
+
+// URL: https://stackoverflow.com/questions/49500339/cant-prevent-touchmove-from-scrolling-window-on-ios
+window.addEventListener('touchmove', function (e) {
+  e.preventDefault();
+}, { passive: false });

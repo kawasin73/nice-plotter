@@ -29,7 +29,6 @@ function randomNorm(x, y, size) {
 }
 
 function getPosition(e) {
-  console.log(e, e.target.getBoundingClientRect(), e.clientX, e.clientY, e.touches[0]);
   const rect = e.target.getBoundingClientRect();
   const mouseX = (e.clientX || e.touches[0].clientX) - Math.floor(rect.left) - 2;
   const mouseY = (e.clientY || e.touches[0].clientY) - Math.floor(rect.top) - 2;
