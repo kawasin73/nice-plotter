@@ -94,6 +94,7 @@ export class Manager {
 
   changeMode(mode) {
     this.mode = mode;
+    this.refreshPointer();
   }
 
   updatePointCount(count) {

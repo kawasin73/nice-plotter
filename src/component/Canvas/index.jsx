@@ -3,6 +3,7 @@ import styled from 'styled-components'
 
 const Container = styled.div`
 position: relative;
+margin: 100px auto;
 `;
 
 const CanvasInner = styled.canvas`

@@ -2,6 +2,10 @@ import React from 'react';
 import { render } from 'react-dom';
 import App from '../component/App';
 import { Manager } from "../logics";
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+
+library.add(fas);
 
 const MAX_COUNT = 1000;
 
