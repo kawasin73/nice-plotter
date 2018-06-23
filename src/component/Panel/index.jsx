@@ -114,35 +114,35 @@ export default function Panel(props) {
       <div>
         <Counter>{props.count}/{props.maxCount}</Counter>
         <ButtonWrap>
-          <NiceButton onClick={props.onAutoFit} disabled={props.count === 0 || props.count === props.maxCount}>
+          <NiceButton onClick={props.onAutoFit} onTouchStart={props.onAutoFit} disabled={props.count === 0 || props.count === props.maxCount}>
             <span>いい感じに {props.maxCount}個 にする</span>
           </NiceButton>
         </ButtonWrap>
         <ButtonWrap>
-          <Button onClick={props.onPlotMode} disabled={props.mode === MODE_WRITE}>
+          <Button onClick={props.onPlotMode} onTouchStart={props.onPlotMode} disabled={props.mode === MODE_WRITE}>
             <Icon icon="paint-brush"/>
             書き込み
           </Button>
-          <Button onClick={props.onEracerMode} disabled={props.mode === MODE_ERASER}>
+          <Button onClick={props.onEracerMode} onTouchStart={props.onEracerMode} disabled={props.mode === MODE_ERASER}>
             <Icon icon="trash-alt"/>
             消去
           </Button>
-          <Button onClick={props.onReducerMode} disabled={props.mode === MODE_REDUCER}>
+          <Button onClick={props.onReducerMode} onTouchStart={props.onReducerMode} disabled={props.mode === MODE_REDUCER}>
             <Icon icon="eraser"/>
             間引く
           </Button>
         </ButtonWrap>
         <Flex>
-          <Button onClick={props.onPrev} disabled={!props.canPrev}>
+          <Button onClick={props.onPrev} onTouchStart={props.onPrev} disabled={!props.canPrev}>
             <Icon icon="undo"/>
             戻る
           </Button>
-          <Button onClick={props.onNext} disabled={!props.canNext}>
+          <Button onClick={props.onNext} onTouchStart={props.onNext} disabled={!props.canNext}>
             <Icon icon="redo"/>
             進む
           </Button>
         </Flex>
-        <Button onClick={props.onDownload}>
+        <Button onClick={props.onDownload} onTouchStart={props.onDownload}>
           <Icon icon="download"/>
           ダウンロード
         </Button>

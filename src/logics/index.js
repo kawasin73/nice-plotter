@@ -93,6 +93,7 @@ export class Manager {
   }
 
   changeMode(mode) {
+    console.log("change mode to : " + mode);
     this.mode = mode;
     this.refreshPointer();
   }
