@@ -25,73 +25,40 @@ const dummyState = {};
 export default class App extends React.Component {
   constructor(props) {
     super(props);
-    this.manager = props.manager;
-    this.updateOverlay = this.manager.updateOverlay.bind(this.manager);
-    this.updateCanvas = this.manager.updateCanvas.bind(this.manager);
-    this.onDownload = this.manager.download.bind(this.manager);
-    this.onMouseDown = this.onMouseDown.bind(this);
-    this.onMouseUp = this.onMouseUp.bind(this);
-    this.onMouseMove = this.onMouseMove.bind(this);
-    this.onPlotMode = this.onPlotMode.bind(this);
-    this.onEracerMode = this.onEracerMode.bind(this);
-    this.onReducerMode = this.onReducerMode.bind(this);
-    this.onAutoFit = this.onAutoFit.bind(this);
-    this.onNext = this.onNext.bind(this);
-    this.onPrev = this.onPrev.bind(this);
-    this.onUpdatePointer = this.onUpdatePointer.bind(this);
+    const m = this.manager = props.manager;
+    this.updateOverlay = this.bindManagerFunc(m.updateOverlay, m);
+    this.updateCanvas = this.bindManagerFunc(m.updateCanvas, m);
+    this.onUpdatePointer = this.bindManagerFunc(m.updatePointCount, m);
+    this.onDownload = this.bindManagerEventFunc(m.download, m);
+    this.onMouseDown = this.bindManagerEventFunc(m.onMouseDown, m);
+    this.onMouseUp = this.bindManagerEventFunc(m.onMouseUp, m);
+    this.onMouseMove = this.bindManagerEventFunc(m.onMouseMove, m);
+    this.onPlotMode = this.bindManagerEventFunc(m.changeMode, m, MODE_WRITE);
+    this.onEracerMode = this.bindManagerEventFunc(m.changeMode, m, MODE_ERASER);
+    this.onReducerMode = this.bindManagerEventFunc(m.changeMode, m, MODE_REDUCER);
+    this.onAutoFit = this.bindManagerEventFunc(m.autoFit, m);
+    this.onNext = this.bindManagerEventFunc(m.goNext, m);
+    this.onPrev = this.bindManagerEventFunc(m.goPrev, m);
   }
 
-  onMouseDown(e) {
-    this.manager.onMouseDown(e);
-    this.setState(dummyState);
-    return false;
+  bindManagerFunc(fn, manager, ...args1) {
+    const f = fn.bind(manager, ...args1);
+    return (...args2) => {
+      f(...args2);
+      this.setState(dummyState);
+      return false;
+    }
   }
 
-  onMouseUp(e) {
-    this.manager.onMouseUp(e);
-    this.setState(dummyState);
-    return false;
-  }
-
-  onMouseMove(e) {
-    this.manager.onMouseMove(e);
-    this.setState(dummyState);
-    return false;
-  }
-
-  onPlotMode() {
-    this.manager.changeMode(MODE_WRITE);
-    this.setState(dummyState);
-  }
-
-  onEracerMode() {
-    this.manager.changeMode(MODE_ERASER);
-    this.setState(dummyState);
-  }
-
-  onReducerMode() {
-    this.manager.changeMode(MODE_REDUCER);
-    this.setState(dummyState);
-  }
-
-  onAutoFit() {
-    this.manager.autoFit();
-    this.setState(dummyState);
-  }
-
-  onNext() {
-    this.manager.goNext();
-    this.setState(dummyState);
-  }
-
-  onPrev() {
-    this.manager.goPrev();
-    this.setState(dummyState);
-  }
-
-  onUpdatePointer(count) {
-    this.manager.updatePointCount(count);
-    this.setState(dummyState);
+  bindManagerEventFunc(fn, manager, ...args1) {
+    const f = fn.bind(manager, ...args1);
+    return (...args2) => {
+      f(...args2);
+      const event = args2[args2.length - 1];
+      event.preventDefault();
+      this.setState(dummyState);
+      return false;
+    }
   }
 
   render() {
